@@ -1,24 +1,41 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System.Collections.Generic;
+using System;
 
 namespace PizzaOrderer
 {
     class Program
     {
 
-        static void PrintMenu()
+        struct Menu
         {
-            System.Console.WriteLine("Menu");
-            System.Console.WriteLine("1) Medium Pizza \t £2");
-            System.Console.WriteLine("2) Large Pizza \t\t £3");
-            System.Console.WriteLine("x) Exit");
+            public string name = "";
+            public Dictionary<string,double> items = new Dictionary<string, double>();
+
+            public Menu(string menuName){
+                name  = menuName;
+            }
+
+        }
+
+        static void PrintMenu(Menu menu)
+        {
+            Console.WriteLine(menu.name);
+            int iterations = 1;
+            foreach (KeyValuePair<string, double> option in menu.items)
+            {
+                Console.WriteLine($"{iterations}) {option.Key}\t\t{option.Value.ToString("C", System.Globalization.CultureInfo.CurrentCulture)}");
+                iterations++;
+            }
+
+            Console.WriteLine("x) Exit");
         }
 
         static string getOption(string[] validOptions)
         {
             while (true)
             {
-                System.Console.Write(">> ");
-                string? userOption = System.Console.ReadLine();
+                Console.Write(">> ");
+                string? userOption = Console.ReadLine();
                 if (String.IsNullOrEmpty(userOption)) continue;
                 userOption = userOption.ToLower();
 
@@ -31,7 +48,12 @@ namespace PizzaOrderer
 
         static void Main()
         {
-            PrintMenu();
+            Menu pizzaSizes = new Menu("Pizza Size");
+            pizzaSizes.items.Add("Medium", 2);
+            pizzaSizes.items.Add("Large", 3);
+
+            PrintMenu(pizzaSizes);
+
             string userOption = getOption(["1", "2", "x"]);
         }
     }
