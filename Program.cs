@@ -19,26 +19,46 @@ namespace PizzaOrderer
                 m_size = size;
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns>Returns the size of pizza (key) and price of size (value)</returns>
             public KeyValuePair<string,double> GetSize()
             {
                 return m_size;
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns>Returns total price of the pizza.</returns>
             public double GetPrice()
             {
                 return m_price;
             }
 
+            /// <summary>
+            /// Adds a topping to the pizza.
+            /// </summary>
+            /// <param name="topping">Key is name of topping, value is price of topping.</param>
             public void AddTopping(KeyValuePair<string,double> topping)
             {
                 m_toppings.Add(topping.Key, topping.Value);
             }
 
+            /// <summary>
+            /// Removes a topping from pizza.
+            /// </summary>
+            /// <param name="toppingName">The key to remove (name of topping).</param>
             public void RemoveTopping(string toppingName)
             {
                 m_toppings.Remove(toppingName);
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns>Returns dictionary of toppings. Key is name of topping, value is price of topping.</returns>
             public Dictionary<string,double> GetToppings()
             {
                 return m_toppings;
@@ -55,21 +75,28 @@ namespace PizzaOrderer
                 m_name  = name;
             }
 
-            public void AddItem(string item, double price)
-            {
-                m_items.Add(item, price);
-            }
-
+            /// <summary>
+            /// Add items in bulk to menu using a dictionary. 
+            /// </summary>
+            /// <param name="items">Key is name of item, value is price of item.</param>
             public void AddItems(Dictionary<string, double> items)
             {
                 foreach (KeyValuePair<string,double> item in items) m_items.Add(item.Key, item.Value); 
             }
 
+            /// <summary>
+            /// Removes individual items from menu.
+            /// </summary>
+            /// <param name="item">The key to be removed (name of item).</param>
             public void RemoveItem(string item)
             {
                 m_items.Remove(item);
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns>Dictionary of all items in menu. Key is name of item, value is price.</returns>
             public Dictionary<string,double> GetItems()
             {
                 return m_items;
@@ -79,7 +106,6 @@ namespace PizzaOrderer
             /// Prints the items of the menu with the menu name as the title.
             /// </summary>
             /// <remarks> Exit option is automatically appended to the end of the menu.</remarks>
-            /// <param name="menu">The menu to be printed.</param>
             public void Print()
             {
                 Console.Clear();
@@ -97,8 +123,8 @@ namespace PizzaOrderer
             /// <summary>
             /// Validates user's input and returns one of the given options.
             /// </summary>
-            /// <param name="validOptions">Array of strings that are valid options that can be selected.</param>
-            /// <returns></returns>
+            /// <returns>Returns option selected by user.</returns>
+            /// <remarks>All options are numbers except "x" which is used to exit</remarks>
             public string GetOption()
             {
                 int numberOfOptions = m_items.ToArray().Length;
