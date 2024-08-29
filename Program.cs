@@ -7,13 +7,18 @@ namespace PizzaOrderer
     {
         class Pizza
         {
-            private KeyValuePair<string,double> m_size;
+            private string? m_size;
             private double m_price;
 
             private Dictionary<string,double> m_toppings = new Dictionary<string, double>();
 
-            Pizza(KeyValuePair<string,double> size)
+            public Pizza()
             { 
+
+            }
+
+            public void SetSize(string size)
+            {
                 m_size = size;
             }
 
@@ -21,7 +26,7 @@ namespace PizzaOrderer
             /// 
             /// </summary>
             /// <returns>Returns the size of pizza (key) and price of size (value)</returns>
-            public KeyValuePair<string,double> GetSize()
+            public string? GetSize()
             {
                 return m_size;
             }
@@ -121,8 +126,8 @@ namespace PizzaOrderer
             /// <summary>
             /// Validates user's input and returns one of the given options.
             /// </summary>
-            /// <returns>Returns option selected by user.</returns>
-            /// <remarks>All options are numbers except "x" which is used to exit</remarks>
+            /// <returns>Returns the option name selected by user NOT NUMBER.</returns>
+            /// <remarks>Option "x" is use to exit menu.</remarks>
             public string GetOption()
             {
                 int numberOfOptions = m_items.ToArray().Length;
@@ -137,7 +142,7 @@ namespace PizzaOrderer
                     bool success = int.TryParse(userOption, out int userOptionNumber);
                     if (!success) continue;
 
-                    if (userOptionNumber <= numberOfOptions) return userOption;
+                    if (userOptionNumber <= numberOfOptions) return m_items.ToArray()[userOptionNumber-1].Key;
                 }
             }
 
@@ -146,31 +151,41 @@ namespace PizzaOrderer
         
         static void Main()
         {
+        
+            Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
+            {
+                { "Medium", 2.00D },
+                { "Large", 3.00D }
+            };
+
+            Dictionary<string,double> toppings = new Dictionary<string, double>
+            {
+                {"Cheese", 0.30},
+                {"Pepperoni", 0.30},
+                {"Meatball", 0.30},
+                {"Pepper", 0.30},
+            };
+
+            // Menu Declarations
+            Menu pizzaSizeMenu = new Menu("Pizza Size");
+            pizzaSizeMenu.AddItems(pizzaSizes);
+
+            Menu toppingsMenu = new Menu("Toppings");
+            toppingsMenu.AddItems(toppings);
+
+            List<Pizza> pizzas = new List<Pizza>();
+
             while (true)
             {
 
-                Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
-                {
-                    { "Medium", 2.00D },
-                    { "Large", 3.00D }
-                };
-
-                Dictionary<string,double> toppings = new Dictionary<string, double>
-                {
-                    {"Cheese", 0.30},
-                    {"Pepperoni", 0.30},
-                    {"Meatball", 0.30},
-                    {"Pepper", 0.30},
-                };
-
-                // Menu Declarations
-                Menu pizzaSizeMenu = new Menu("Pizza Size");
-                pizzaSizeMenu.AddItems(pizzaSizes);
-
-
                 pizzaSizeMenu.Print();
-                string userOption = pizzaSizeMenu.GetOption();
-                if (userOption.Equals("x")) break;
+                string selectedPizzaSize = pizzaSizeMenu.GetOption();
+                if (selectedPizzaSize.Equals("x")) break;
+
+                Pizza currentPizza = new();
+
+                currentPizza.SetSize(selectedPizzaSize);
+                
 
             }
         }
