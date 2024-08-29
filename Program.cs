@@ -1,10 +1,49 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Drawing;
 
 namespace PizzaOrderer
 {
     class Program
     {
+        class Pizza
+        {
+            private KeyValuePair<string,double> m_size;
+            private double m_price;
+
+            private Dictionary<string,double> m_toppings = new Dictionary<string, double>();
+
+            Pizza(KeyValuePair<string,double> size)
+            { 
+                m_size = size;
+            }
+
+            public KeyValuePair<string,double> GetSize()
+            {
+                return m_size;
+            }
+
+            public double GetPrice()
+            {
+                return m_price;
+            }
+
+            public void AddTopping(KeyValuePair<string,double> topping)
+            {
+                m_toppings.Add(topping.Key, topping.Value);
+            }
+
+            public void RemoveTopping(string toppingName)
+            {
+                m_toppings.Remove(toppingName);
+            }
+
+            public Dictionary<string,double> GetToppings()
+            {
+                return m_toppings;
+            }
+
+        }
 
         struct Menu
         {
@@ -17,13 +56,7 @@ namespace PizzaOrderer
 
         }
 
-        struct Pizza
-        {
-            public string name;
-            public double price;
 
-            
-        }
         /// <summary>
         /// Prints the items of the menu with the menu name as the title.
         /// </summary>
@@ -69,15 +102,27 @@ namespace PizzaOrderer
             while (true)
             {
 
+            
+                Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
+                {
+                    { "Medium", 2.00D },
+                    { "Large", 3.00D }
+                };
+
+                Dictionary<string,double> toppings = new Dictionary<string, double>
+                {
+                    {"Cheese", 0.30},
+                    {"Pepperoni", 0.30},
+                    {"Meatball", 0.30},
+                    {"Pepper", 0.30},
+                };
 
                 // Menu Declarations
-                Menu pizzaSizes = new Menu("Pizza Size");
-                pizzaSizes.items.Add("Medium", 2);
-                pizzaSizes.items.Add("Large", 3);
+                Menu pizzaSizeMenu = new Menu("Pizza Size");
+                pizzaSizeMenu.items.Add("Medium", 2);
+                pizzaSizeMenu.items.Add("Large", 3);
 
-
-
-                PrintMenu(pizzaSizes);
+                PrintMenu(pizzaSizeMenu);
 
                 string userOption = getOption(["1", "2", "x"]);
                 if (userOption.Equals("x")) break;
