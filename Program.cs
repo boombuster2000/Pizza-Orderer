@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PizzaOrderer
 {
@@ -7,19 +8,14 @@ namespace PizzaOrderer
     {
         class Pizza
         {
-            private string? m_size;
+            private string m_size;
             private double m_price;
 
-            private Dictionary<string,double> m_toppings = new Dictionary<string, double>();
+            private List<string> m_toppings = new List<string>();
 
-            public Pizza()
+            public Pizza(string size)
             { 
-
-            }
-
-            public void SetSize(string size)
-            {
-                m_size = size;
+                m_size = size;  
             }
 
             /// <summary>
@@ -44,9 +40,9 @@ namespace PizzaOrderer
             /// Adds a topping to the pizza.
             /// </summary>
             /// <param name="topping">Key is name of topping, value is price of topping.</param>
-            public void AddTopping(KeyValuePair<string,double> topping)
+            public void AddTopping(string topping)
             {
-                m_toppings.Add(topping.Key, topping.Value);
+                m_toppings.Add(topping);
             }
 
             /// <summary>
@@ -62,7 +58,7 @@ namespace PizzaOrderer
             /// 
             /// </summary>
             /// <returns>Returns dictionary of toppings. Key is name of topping, value is price of topping.</returns>
-            public Dictionary<string,double> GetToppings()
+            public List<string> GetToppings()
             {
                 return m_toppings;
             }
@@ -146,6 +142,11 @@ namespace PizzaOrderer
                 }
             }
 
+            static public void PromptUser(string message)
+            {
+                Console.WriteLine(message);
+                Thread.Sleep(2000);
+            }
         }
 
         
@@ -182,11 +183,18 @@ namespace PizzaOrderer
                 string selectedPizzaSize = pizzaSizeMenu.GetOption();
                 if (selectedPizzaSize.Equals("x")) break;
 
-                Pizza currentPizza = new();
+                Pizza currentPizza = new Pizza(selectedPizzaSize);
 
-                currentPizza.SetSize(selectedPizzaSize);
-                
+                while (true)
+                {
+                    toppingsMenu.Print();
+                    string selectedTopping = toppingsMenu.GetOption();
+                    if (selectedTopping.Equals("x")) break;
 
+                    currentPizza.AddTopping(selectedTopping);
+                    Menu.PromptUser($"Added topping: {selectedTopping}");
+                    
+                }
             }
         }
     }
