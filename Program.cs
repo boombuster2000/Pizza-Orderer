@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace PizzaOrderer
 {
@@ -45,64 +46,85 @@ namespace PizzaOrderer
 
         }
 
-        struct Menu
+        class Menu
         {
-            public string name = "";
-            public Dictionary<string,double> items = new Dictionary<string, double>();
+            private string m_name = "";
+            private Dictionary<string,double> m_items = new Dictionary<string, double>();
 
-            public Menu(string menuName){
-                name  = menuName;
+            public Menu(string name){
+                m_name  = name;
             }
 
-        }
-
-
-        /// <summary>
-        /// Prints the items of the menu with the menu name as the title.
-        /// </summary>
-        /// <remarks> Exit option is automatically appended to the end of the menu.</remarks>
-        /// <param name="menu">The menu to be printed.</param>
-        static void PrintMenu(Menu menu)
-        {
-            Console.Clear();
-            Console.WriteLine(menu.name);
-            int iterations = 1;
-            foreach (KeyValuePair<string, double> option in menu.items)
+            public void AddItem(string item, double price)
             {
-                Console.WriteLine($"{iterations}) {option.Key}\t\t{option.Value.ToString("C", System.Globalization.CultureInfo.CurrentCulture)}");
-                iterations++;
+                m_items.Add(item, price);
             }
 
-            Console.WriteLine("x) Exit");
-        }
-
-        /// <summary>
-        /// Validates user's input and returns one of the given options.
-        /// </summary>
-        /// <param name="validOptions">Array of strings that are valid options that can be selected.</param>
-        /// <returns></returns>
-        static string getOption(string[] validOptions)
-        {
-            while (true)
+            public void AddItems(Dictionary<string, double> items)
             {
-                Console.Write(">> ");
-                string? userOption = Console.ReadLine();
-                if (String.IsNullOrEmpty(userOption)) continue;
-                userOption = userOption.ToLower();
-
-                bool isValidOption = false;
-                foreach (string option in validOptions) if (option.Equals(userOption)) isValidOption = true;
-                if (!isValidOption) continue;
-                return userOption;
+                foreach (KeyValuePair<string,double> item in items) m_items.Add(item.Key, item.Value); 
             }
+
+            public void RemoveItem(string item)
+            {
+                m_items.Remove(item);
+            }
+
+            public Dictionary<string,double> GetItems()
+            {
+                return m_items;
+            }
+
+            /// <summary>
+            /// Prints the items of the menu with the menu name as the title.
+            /// </summary>
+            /// <remarks> Exit option is automatically appended to the end of the menu.</remarks>
+            /// <param name="menu">The menu to be printed.</param>
+            public void Print()
+            {
+                Console.Clear();
+                Console.WriteLine(m_name);
+                int iterations = 1;
+                foreach (KeyValuePair<string, double> option in m_items)
+                {
+                    Console.WriteLine($"{iterations}) {option.Key}\t\t{option.Value.ToString("C", System.Globalization.CultureInfo.CurrentCulture)}");
+                    iterations++;
+                }
+
+                Console.WriteLine("x) Exit");
+            }
+
+            /// <summary>
+            /// Validates user's input and returns one of the given options.
+            /// </summary>
+            /// <param name="validOptions">Array of strings that are valid options that can be selected.</param>
+            /// <returns></returns>
+            public string GetOption()
+            {
+                int numberOfOptions = m_items.ToArray().Length;
+
+                while (true)
+                {
+                    Console.Write(">> ");
+                    string? userOption = Console.ReadLine();
+                    if (string.IsNullOrEmpty(userOption)) continue;
+                    if (userOption.ToLower() == "x") return userOption;
+                    
+                    bool success = int.TryParse(userOption, out int userOptionNumber);
+                    if (!success) continue;
+
+                    if (userOptionNumber <= numberOfOptions) return userOption;
+                }
+            }
+
         }
 
+        
         static void Main()
         {
             while (true)
             {
 
-            
                 Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
                 {
                     { "Medium", 2.00D },
@@ -119,12 +141,11 @@ namespace PizzaOrderer
 
                 // Menu Declarations
                 Menu pizzaSizeMenu = new Menu("Pizza Size");
-                pizzaSizeMenu.items.Add("Medium", 2);
-                pizzaSizeMenu.items.Add("Large", 3);
+                pizzaSizeMenu.AddItems(pizzaSizes);
 
-                PrintMenu(pizzaSizeMenu);
 
-                string userOption = getOption(["1", "2", "x"]);
+                pizzaSizeMenu.Print();
+                string userOption = pizzaSizeMenu.GetOption();
                 if (userOption.Equals("x")) break;
 
             }
