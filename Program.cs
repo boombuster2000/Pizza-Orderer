@@ -105,7 +105,7 @@ namespace PizzaOrderer
             /// Prints the items of the menu with the menu name as the title.
             /// </summary>
             /// <remarks> Exit option is automatically appended to the end of the menu.</remarks>
-            public void Print()
+            public void PrintMenu()
             {
                 Console.Clear();
                 Console.WriteLine(m_name);
@@ -130,7 +130,7 @@ namespace PizzaOrderer
 
                 while (true)
                 {
-                    Console.Write(">> ");
+                    Console.Write("\n>> ");
                     string? userOption = Console.ReadLine();
                     if (string.IsNullOrEmpty(userOption)) continue;
                     if (userOption.ToLower() == "x") return userOption;
@@ -145,7 +145,14 @@ namespace PizzaOrderer
             static public void PromptUser(string message)
             {
                 Console.WriteLine(message);
-                Thread.Sleep(2000);
+                Thread.Sleep(1500);
+            }
+            
+            static public void PrintCurrentPizza(Pizza currentPizza)
+            {
+                Console.WriteLine($"Pizza Size: {currentPizza.GetSize()}");
+                Console.Write("Current Toppings: ");
+                foreach (string topping in currentPizza.GetToppings()) Console.Write($"{topping}, ");
             }
         }
 
@@ -179,7 +186,7 @@ namespace PizzaOrderer
             while (true)
             {
 
-                pizzaSizeMenu.Print();
+                pizzaSizeMenu.PrintMenu();
                 string selectedPizzaSize = pizzaSizeMenu.GetOption();
                 if (selectedPizzaSize.Equals("x")) break;
 
@@ -187,7 +194,10 @@ namespace PizzaOrderer
 
                 while (true)
                 {
-                    toppingsMenu.Print();
+                    toppingsMenu.PrintMenu();
+                    Console.Write("\n");
+                    Menu.PrintCurrentPizza(currentPizza);
+
                     string selectedTopping = toppingsMenu.GetOption();
                     if (selectedTopping.Equals("x")) break;
 
