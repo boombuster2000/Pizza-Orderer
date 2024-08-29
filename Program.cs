@@ -63,11 +63,18 @@ namespace PizzaOrderer
                 return m_toppings;
             }
 
+            public void PrintPizzaDetails()
+            {
+                Console.WriteLine($"Pizza Size: {m_size}");
+                Console.Write("Current Toppings: ");
+                foreach (string topping in m_toppings) Console.Write($"{topping}, ");
+            }
         }
 
         class Menu
         {
             private string m_name = "";
+            private bool m_liveEditting = false;
             private Dictionary<string,double> m_items = new Dictionary<string, double>();
 
             public Menu(string name){
@@ -116,7 +123,10 @@ namespace PizzaOrderer
                     iterations++;
                 }
 
+                if (m_liveEditting) Console.WriteLine("c) Confirm");
                 Console.WriteLine("x) Exit");
+
+                if (m_liveEditting) return;
             }
 
             /// <summary>
@@ -133,7 +143,8 @@ namespace PizzaOrderer
                     Console.Write("\n>> ");
                     string? userOption = Console.ReadLine();
                     if (string.IsNullOrEmpty(userOption)) continue;
-                    if (userOption.ToLower() == "x") return userOption;
+                    if (userOption.ToLower().Equals("x")) return userOption;
+                    else if (m_liveEditting && userOption.ToLower().Equals("c")) return userOption;
                     
                     bool success = int.TryParse(userOption, out int userOptionNumber);
                     if (!success) continue;
@@ -142,17 +153,15 @@ namespace PizzaOrderer
                 }
             }
 
+            public void ToggleLiveEditting()
+            {
+                if (m_liveEditting) m_liveEditting = false;
+                else m_liveEditting = true;
+            }
             static public void PromptUser(string message)
             {
                 Console.WriteLine(message);
                 Thread.Sleep(1500);
-            }
-            
-            static public void PrintCurrentPizza(Pizza currentPizza)
-            {
-                Console.WriteLine($"Pizza Size: {currentPizza.GetSize()}");
-                Console.Write("Current Toppings: ");
-                foreach (string topping in currentPizza.GetToppings()) Console.Write($"{topping}, ");
             }
         }
 
@@ -192,18 +201,21 @@ namespace PizzaOrderer
 
                 Pizza currentPizza = new Pizza(selectedPizzaSize);
 
+                toppingsMenu.ToggleLiveEditting();
                 while (true)
                 {
                     toppingsMenu.PrintMenu();
                     Console.Write("\n");
-                    Menu.PrintCurrentPizza(currentPizza);
+                    currentPizza.PrintPizzaDetails();
 
                     string selectedTopping = toppingsMenu.GetOption();
                     if (selectedTopping.Equals("x")) break;
-
+                    else if (selectedTopping.Equals("c")) 
+                    {
+                        pizzas.Add(currentPizza);
+                        break;
+                    }
                     currentPizza.AddTopping(selectedTopping);
-                    Menu.PromptUser($"Added topping: {selectedTopping}");
-                    
                 }
             }
         }
