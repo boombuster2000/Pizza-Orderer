@@ -183,8 +183,8 @@ namespace PizzaOrderer
                     userOptionNumber--;
                     if (userOptionNumber > numberOfOptions) continue;
 
-                    if (userOptionNumber <= m_options.ToArray().Length) return m_options[userOptionNumber];
-                    else return m_items.ToArray()[userOptionNumber].Key;
+                    if (userOptionNumber < m_options.ToArray().Length) return m_options[userOptionNumber];
+                    else return m_items.ToArray()[userOptionNumber-m_options.ToArray().Length].Key;
 
                 }
             }
