@@ -77,6 +77,8 @@ namespace PizzaOrderer
             private bool m_liveEditting = false;
             private Dictionary<string,double> m_items = new Dictionary<string, double>();
 
+            private List<string> m_options = new List<string>();
+
             public Menu(string name){
                 m_name  = name;
             }
@@ -106,6 +108,11 @@ namespace PizzaOrderer
             public Dictionary<string,double> GetItems()
             {
                 return m_items;
+            }
+
+            public void AddOptions(string[] options)
+            {
+                m_options.AddRange(options);
             }
 
             /// <summary>
@@ -168,7 +175,6 @@ namespace PizzaOrderer
         
         static void Main()
         {
-        
             Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
             {
                 { "Medium", 2.00D },
@@ -183,7 +189,12 @@ namespace PizzaOrderer
                 {"Pepper", 0.30},
             };
 
+            string[] mainMenuOptions = ["Add Pizza", "Remove Pizza", "View Order", "Purchase"];
+
             // Menu Declarations
+            Menu mainMenu = new Menu("Menu");
+            mainMenu.AddOptions(mainMenuOptions);
+
             Menu pizzaSizeMenu = new Menu("Pizza Size");
             pizzaSizeMenu.AddItems(pizzaSizes);
 
