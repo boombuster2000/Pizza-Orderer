@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace PizzaOrderer
 {
@@ -7,21 +9,21 @@ namespace PizzaOrderer
     {
         class Pizza
         {
-            private KeyValuePair<string,double> m_size;
+            private string m_size;
             private double m_price;
 
-            private Dictionary<string,double> m_toppings = new Dictionary<string, double>();
+            private List<string> m_toppings = new List<string>();
 
-            Pizza(KeyValuePair<string,double> size)
+            public Pizza(string size)
             { 
-                m_size = size;
+                m_size = size;  
             }
 
             /// <summary>
             /// 
             /// </summary>
             /// <returns>Returns the size of pizza (key) and price of size (value)</returns>
-            public KeyValuePair<string,double> GetSize()
+            public string? GetSize()
             {
                 return m_size;
             }
@@ -39,9 +41,9 @@ namespace PizzaOrderer
             /// Adds a topping to the pizza.
             /// </summary>
             /// <param name="topping">Key is name of topping, value is price of topping.</param>
-            public void AddTopping(KeyValuePair<string,double> topping)
+            public void AddTopping(string topping)
             {
-                m_toppings.Add(topping.Key, topping.Value);
+                m_toppings.Add(topping);
             }
 
             /// <summary>
@@ -57,17 +59,26 @@ namespace PizzaOrderer
             /// 
             /// </summary>
             /// <returns>Returns dictionary of toppings. Key is name of topping, value is price of topping.</returns>
-            public Dictionary<string,double> GetToppings()
+            public List<string> GetToppings()
             {
                 return m_toppings;
             }
 
+            public void PrintPizzaDetails()
+            {
+                Console.WriteLine($"Pizza Size: {m_size}");
+                Console.Write("Current Toppings: ");
+                foreach (string topping in m_toppings) Console.Write($"{topping}, ");
+            }
         }
 
         class Menu
         {
             private string m_name = "";
+            private bool m_liveEditting = false;
             private Dictionary<string,double> m_items = new Dictionary<string, double>();
+
+            private List<string> m_options = new List<string>();
 
             public Menu(string name){
                 m_name  = name;
@@ -100,78 +111,140 @@ namespace PizzaOrderer
                 return m_items;
             }
 
+            public void AddOptions(string[] options)
+            {
+                m_options.AddRange(options);
+            }
+
             /// <summary>
             /// Prints the items of the menu with the menu name as the title.
             /// </summary>
             /// <remarks> Exit option is automatically appended to the end of the menu.</remarks>
-            public void Print()
+            public void PrintMenu()
             {
                 Console.Clear();
                 Console.WriteLine(m_name);
                 int iterations = 1;
+
+                foreach (string option in m_options)
+                {
+                    Console.WriteLine($"{iterations}) {option}");
+                    iterations++;
+                }
+
+                if (m_options.Count() != 0 && m_items.Count() != 0 )Console.Write("\n");
+
                 foreach (KeyValuePair<string, double> option in m_items)
                 {
                     Console.WriteLine($"{iterations}) {option.Key}\t\t{option.Value.ToString("C", System.Globalization.CultureInfo.CurrentCulture)}");
                     iterations++;
                 }
 
+                if (m_liveEditting) Console.WriteLine("c) Confirm");
                 Console.WriteLine("x) Exit");
+
+                if (m_liveEditting) return;
             }
 
             /// <summary>
             /// Validates user's input and returns one of the given options.
             /// </summary>
-            /// <returns>Returns option selected by user.</returns>
-            /// <remarks>All options are numbers except "x" which is used to exit</remarks>
+            /// <returns>Returns the option name selected by user NOT NUMBER.</returns>
             public string GetOption()
             {
                 int numberOfOptions = m_items.ToArray().Length;
 
                 while (true)
                 {
-                    Console.Write(">> ");
+                    Console.Write("\n>> ");
                     string? userOption = Console.ReadLine();
                     if (string.IsNullOrEmpty(userOption)) continue;
-                    if (userOption.ToLower() == "x") return userOption;
+                    if (userOption.ToLower().Equals("x")) return "Exit";
+                    else if (m_liveEditting && userOption.ToLower().Equals("c")) return "Confirm";
                     
                     bool success = int.TryParse(userOption, out int userOptionNumber);
                     if (!success) continue;
 
-                    if (userOptionNumber <= numberOfOptions) return userOption;
+                    if (userOptionNumber <= numberOfOptions) return m_items.ToArray()[userOptionNumber-1].Key;
                 }
             }
 
+            public void ToggleLiveEditting()
+            {
+                if (m_liveEditting) m_liveEditting = false;
+                else m_liveEditting = true;
+            }
+            static public void PromptUser(string message)
+            {
+                Console.WriteLine(message);
+                Thread.Sleep(1500);
+            }
         }
 
         
         static void Main()
         {
+            Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
+            {
+                { "Medium", 2.00D },
+                { "Large", 3.00D }
+            };
+
+            Dictionary<string,double> toppings = new Dictionary<string, double>
+            {
+                {"Cheese", 0.30},
+                {"Pepperoni", 0.30},
+                {"Meatball", 0.30},
+                {"Pepper", 0.30},
+            };
+
+            string[] mainMenuOptions = ["Add Pizza", "Remove Pizza", "View Order", "Purchase"];
+
+            // Menu Declarations
+            Menu mainMenu = new Menu("Menu");
+            mainMenu.AddOptions(mainMenuOptions);
+
+            Menu pizzaSizeMenu = new Menu("Pizza Size");
+            pizzaSizeMenu.AddItems(pizzaSizes);
+
+            Menu toppingsMenu = new Menu("Toppings");
+            toppingsMenu.AddItems(toppings);
+
+            List<Pizza> pizzas = new List<Pizza>();
+
             while (true)
             {
 
-                Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
+                mainMenu.PrintMenu();
+                string selectedMenuOption = mainMenu.GetOption();
+                if (selectedMenuOption.Equals("Exit")) break;
+
+                while (true)
                 {
-                    { "Medium", 2.00D },
-                    { "Large", 3.00D }
-                };
 
-                Dictionary<string,double> toppings = new Dictionary<string, double>
-                {
-                    {"Cheese", 0.30},
-                    {"Pepperoni", 0.30},
-                    {"Meatball", 0.30},
-                    {"Pepper", 0.30},
-                };
+                    pizzaSizeMenu.PrintMenu();
+                    string selectedPizzaSize = pizzaSizeMenu.GetOption();
+                    if (selectedPizzaSize.Equals("Exit")) break;
 
-                // Menu Declarations
-                Menu pizzaSizeMenu = new Menu("Pizza Size");
-                pizzaSizeMenu.AddItems(pizzaSizes);
+                    Pizza currentPizza = new Pizza(selectedPizzaSize);
 
+                    toppingsMenu.ToggleLiveEditting();
+                    while (true)
+                    {
+                        toppingsMenu.PrintMenu();
+                        Console.Write("\n");
+                        currentPizza.PrintPizzaDetails();
 
-                pizzaSizeMenu.Print();
-                string userOption = pizzaSizeMenu.GetOption();
-                if (userOption.Equals("x")) break;
-
+                        string selectedTopping = toppingsMenu.GetOption();
+                        if (selectedTopping.Equals("Exit")) break;
+                        else if (selectedTopping.Equals("Confirm")) 
+                        {
+                            pizzas.Add(currentPizza);
+                            break;
+                        }
+                        currentPizza.AddTopping(selectedTopping);
+                    }
+                }
             }
         }
     }
