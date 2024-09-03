@@ -270,14 +270,28 @@ namespace PizzaOrderer
                         break;
 
                     case "Remove Pizza":
-                        Menu createdPizzasMenu = new Menu("Your Pizzas");
-                        foreach (Pizza pizza in pizzas)
-                        {
-                            createdPizzasMenu.AddOption(pizza.ToString());
-                        }
 
-                        createdPizzasMenu.PrintMenu();
-                        createdPizzasMenu.GetOption();
+                        while (true)
+                        {
+                            Menu createdPizzasMenu = new Menu("Your Pizzas");
+                            foreach (Pizza pizza in pizzas)
+                            {
+                                createdPizzasMenu.AddOption(pizza.ToString());
+                            }
+
+                            createdPizzasMenu.PrintMenu();
+                            string pizzaToRemove = createdPizzasMenu.GetOption();
+                            if (pizzaToRemove.Equals("Exit")) break;
+                            
+                            foreach (Pizza pizza in pizzas)
+                            {
+                                if (pizzaToRemove.Equals(pizza.ToString())) 
+                                {
+                                    pizzas.Remove(pizza).ToString();
+                                    break;
+                                }
+                            }
+                        }
                         break;
                 }
                 
