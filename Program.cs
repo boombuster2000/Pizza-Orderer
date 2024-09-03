@@ -150,7 +150,6 @@ namespace PizzaOrderer
             /// Validates user's input and returns one of the given options.
             /// </summary>
             /// <returns>Returns the option name selected by user NOT NUMBER.</returns>
-            /// <remarks>Option "x" is use to exit menu.</remarks>
             public string GetOption()
             {
                 int numberOfOptions = m_items.ToArray().Length;
@@ -160,8 +159,8 @@ namespace PizzaOrderer
                     Console.Write("\n>> ");
                     string? userOption = Console.ReadLine();
                     if (string.IsNullOrEmpty(userOption)) continue;
-                    if (userOption.ToLower().Equals("x")) return userOption;
-                    else if (m_liveEditting && userOption.ToLower().Equals("c")) return userOption;
+                    if (userOption.ToLower().Equals("x")) return "Exit";
+                    else if (m_liveEditting && userOption.ToLower().Equals("c")) return "Confirm";
                     
                     bool success = int.TryParse(userOption, out int userOptionNumber);
                     if (!success) continue;
@@ -217,14 +216,15 @@ namespace PizzaOrderer
             {
 
                 mainMenu.PrintMenu();
-                pizzaSizeMenu.GetOption();
+                string selectedMenuOption = mainMenu.GetOption();
+                if (selectedMenuOption.Equals("Exit")) break;
 
                 while (true)
                 {
 
                     pizzaSizeMenu.PrintMenu();
                     string selectedPizzaSize = pizzaSizeMenu.GetOption();
-                    if (selectedPizzaSize.Equals("x")) break;
+                    if (selectedPizzaSize.Equals("Exit")) break;
 
                     Pizza currentPizza = new Pizza(selectedPizzaSize);
 
@@ -236,8 +236,8 @@ namespace PizzaOrderer
                         currentPizza.PrintPizzaDetails();
 
                         string selectedTopping = toppingsMenu.GetOption();
-                        if (selectedTopping.Equals("x")) break;
-                        else if (selectedTopping.Equals("c")) 
+                        if (selectedTopping.Equals("Exit")) break;
+                        else if (selectedTopping.Equals("Confirm")) 
                         {
                             pizzas.Add(currentPizza);
                             break;
