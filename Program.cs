@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace PizzaOrderer
 {
@@ -124,6 +125,15 @@ namespace PizzaOrderer
                 Console.Clear();
                 Console.WriteLine(m_name);
                 int iterations = 1;
+
+                foreach (string option in m_options)
+                {
+                    Console.WriteLine($"{iterations}) {option}");
+                    iterations++;
+                }
+
+                if (m_options.Count() != 0 && m_items.Count() != 0 )Console.Write("\n");
+
                 foreach (KeyValuePair<string, double> option in m_items)
                 {
                     Console.WriteLine($"{iterations}) {option.Key}\t\t{option.Value.ToString("C", System.Globalization.CultureInfo.CurrentCulture)}");
@@ -206,27 +216,34 @@ namespace PizzaOrderer
             while (true)
             {
 
-                pizzaSizeMenu.PrintMenu();
-                string selectedPizzaSize = pizzaSizeMenu.GetOption();
-                if (selectedPizzaSize.Equals("x")) break;
+                mainMenu.PrintMenu();
+                pizzaSizeMenu.GetOption();
 
-                Pizza currentPizza = new Pizza(selectedPizzaSize);
-
-                toppingsMenu.ToggleLiveEditting();
                 while (true)
                 {
-                    toppingsMenu.PrintMenu();
-                    Console.Write("\n");
-                    currentPizza.PrintPizzaDetails();
 
-                    string selectedTopping = toppingsMenu.GetOption();
-                    if (selectedTopping.Equals("x")) break;
-                    else if (selectedTopping.Equals("c")) 
+                    pizzaSizeMenu.PrintMenu();
+                    string selectedPizzaSize = pizzaSizeMenu.GetOption();
+                    if (selectedPizzaSize.Equals("x")) break;
+
+                    Pizza currentPizza = new Pizza(selectedPizzaSize);
+
+                    toppingsMenu.ToggleLiveEditting();
+                    while (true)
                     {
-                        pizzas.Add(currentPizza);
-                        break;
+                        toppingsMenu.PrintMenu();
+                        Console.Write("\n");
+                        currentPizza.PrintPizzaDetails();
+
+                        string selectedTopping = toppingsMenu.GetOption();
+                        if (selectedTopping.Equals("x")) break;
+                        else if (selectedTopping.Equals("c")) 
+                        {
+                            pizzas.Add(currentPizza);
+                            break;
+                        }
+                        currentPizza.AddTopping(selectedTopping);
                     }
-                    currentPizza.AddTopping(selectedTopping);
                 }
             }
         }
