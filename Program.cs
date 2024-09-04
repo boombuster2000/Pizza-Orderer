@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+﻿using System.Diagnostics.Contracts;
 
 namespace PizzaOrderer
 {
@@ -10,7 +7,6 @@ namespace PizzaOrderer
         class Pizza
         {
             private string m_size;
-            private double m_price;
 
             private List<string> m_toppings = new List<string>();
 
@@ -23,18 +19,9 @@ namespace PizzaOrderer
             /// 
             /// </summary>
             /// <returns>Returns the size of pizza (key) and price of size (value)</returns>
-            public string? GetSize()
+            public string GetSize()
             {
                 return m_size;
-            }
-
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <returns>Returns total price of the pizza.</returns>
-            public double GetPrice()
-            {
-                return m_price;
             }
 
             /// <summary>
@@ -58,7 +45,7 @@ namespace PizzaOrderer
             /// <summary>
             /// 
             /// </summary>
-            /// <returns>Returns dictionary of toppings. Key is name of topping, value is price of topping.</returns>
+            /// <returns>Returns list of toppings.</returns>
             public List<string> GetToppings()
             {
                 return m_toppings;
@@ -67,9 +54,36 @@ namespace PizzaOrderer
             public void PrintPizzaDetails()
             {
                 Console.WriteLine($"Pizza Size: {m_size}");
-                Console.Write("Current Toppings: ");
+                Console.Write("Toppings: ");
                 foreach (string topping in m_toppings) Console.Write($"{topping}, ");
             }
+
+            public static double GetCost(Pizza pizza, Dictionary<string,double> sizePricing, Dictionary<string,double> toppingPricing)
+            {
+                double cost = 0;
+
+                cost += sizePricing[pizza.GetSize()];
+
+                foreach (string topping in pizza.GetToppings())
+                {
+                    cost += toppingPricing[topping];
+                }
+
+                return cost;
+            }
+
+            public override string ToString()
+            {
+                string text = $"{m_size} Pizza: ";
+                foreach (string topping in m_toppings)
+                {
+                    text += $"{topping}, ";
+                    //if (m_toppings.BinarySearch(topping) != m_toppings.Count()-1) text += ", ";
+                }
+
+                return text;
+            }
+            
         }
 
         class Menu
@@ -93,6 +107,11 @@ namespace PizzaOrderer
                 foreach (KeyValuePair<string,double> item in items) m_items.Add(item.Key, item.Value); 
             }
 
+            public void AddItem(KeyValuePair<string, double> item)
+            {
+                m_items.Add(item.Key, item.Value);
+            }
+
             /// <summary>
             /// Removes individual items from menu.
             /// </summary>
@@ -109,6 +128,11 @@ namespace PizzaOrderer
             public Dictionary<string,double> GetItems()
             {
                 return m_items;
+            }
+
+            public void AddOption(string option)
+            {
+                m_options.Add(option);
             }
 
             public void AddOptions(string[] options)
@@ -152,7 +176,7 @@ namespace PizzaOrderer
             /// <returns>Returns the option name selected by user NOT NUMBER.</returns>
             public string GetOption()
             {
-                int numberOfOptions = m_items.ToArray().Length;
+                int numberOfOptions = m_items.ToArray().Length + m_options.ToArray().Length-1;
 
                 while (true)
                 {
@@ -165,7 +189,12 @@ namespace PizzaOrderer
                     bool success = int.TryParse(userOption, out int userOptionNumber);
                     if (!success) continue;
 
-                    if (userOptionNumber <= numberOfOptions) return m_items.ToArray()[userOptionNumber-1].Key;
+                    userOptionNumber--;
+                    if (userOptionNumber > numberOfOptions) continue;
+
+                    if (userOptionNumber < m_options.ToArray().Length) return m_options[userOptionNumber];
+                    else return m_items.ToArray()[userOptionNumber-m_options.ToArray().Length].Key;
+
                 }
             }
 
@@ -181,16 +210,15 @@ namespace PizzaOrderer
             }
         }
 
-        
         static void Main()
         {
-            Dictionary<string, double> pizzaSizes = new Dictionary<string, double>
+            Dictionary<string, double> pizzaSizesPricing = new Dictionary<string, double>
             {
                 { "Medium", 2.00D },
                 { "Large", 3.00D }
             };
 
-            Dictionary<string,double> toppings = new Dictionary<string, double>
+            Dictionary<string,double> toppingsPricing = new Dictionary<string, double>
             {
                 {"Cheese", 0.30},
                 {"Pepperoni", 0.30},
@@ -198,17 +226,18 @@ namespace PizzaOrderer
                 {"Pepper", 0.30},
             };
 
-            string[] mainMenuOptions = ["Add Pizza", "Remove Pizza", "View Order", "Purchase"];
+            string[] mainMenuOptions = ["Add Pizza", "Remove Pizza", "View Order"];
 
             // Menu Declarations
             Menu mainMenu = new Menu("Menu");
             mainMenu.AddOptions(mainMenuOptions);
 
             Menu pizzaSizeMenu = new Menu("Pizza Size");
-            pizzaSizeMenu.AddItems(pizzaSizes);
+            pizzaSizeMenu.AddItems(pizzaSizesPricing);
 
             Menu toppingsMenu = new Menu("Toppings");
-            toppingsMenu.AddItems(toppings);
+            toppingsMenu.AddItems(toppingsPricing);
+            toppingsMenu.ToggleLiveEditting();
 
             List<Pizza> pizzas = new List<Pizza>();
 
@@ -219,32 +248,97 @@ namespace PizzaOrderer
                 string selectedMenuOption = mainMenu.GetOption();
                 if (selectedMenuOption.Equals("Exit")) break;
 
-                while (true)
+                switch (selectedMenuOption)
                 {
-
-                    pizzaSizeMenu.PrintMenu();
-                    string selectedPizzaSize = pizzaSizeMenu.GetOption();
-                    if (selectedPizzaSize.Equals("Exit")) break;
-
-                    Pizza currentPizza = new Pizza(selectedPizzaSize);
-
-                    toppingsMenu.ToggleLiveEditting();
-                    while (true)
-                    {
-                        toppingsMenu.PrintMenu();
-                        Console.Write("\n");
-                        currentPizza.PrintPizzaDetails();
-
-                        string selectedTopping = toppingsMenu.GetOption();
-                        if (selectedTopping.Equals("Exit")) break;
-                        else if (selectedTopping.Equals("Confirm")) 
+                    case "Add Pizza":
+                        while (selectedMenuOption.Equals(mainMenuOptions[0]))
                         {
-                            pizzas.Add(currentPizza);
-                            break;
+
+                            pizzaSizeMenu.PrintMenu();
+                            string selectedPizzaSize = pizzaSizeMenu.GetOption();
+                            if (selectedPizzaSize.Equals("Exit")) break;
+
+                            Pizza currentPizza = new Pizza(selectedPizzaSize);
+
+                            while (true)
+                            {
+                                toppingsMenu.PrintMenu();
+                                Console.Write("\n");
+                                currentPizza.PrintPizzaDetails();
+
+                                string selectedTopping = toppingsMenu.GetOption();
+                                if (selectedTopping.Equals("Exit")) break;
+                                else if (selectedTopping.Equals("Confirm")) 
+                                {
+                                    pizzas.Add(currentPizza);
+                                    break;
+                                }
+                                currentPizza.AddTopping(selectedTopping);
+                            }
                         }
-                        currentPizza.AddTopping(selectedTopping);
-                    }
+                        break;
+
+                    case "Remove Pizza":
+
+                        while (true)
+                        {
+                            Menu createdPizzasMenu = new Menu("Your Pizzas");
+                            foreach (Pizza pizza in pizzas)
+                            {
+                                createdPizzasMenu.AddOption(pizza.ToString());
+                            }
+
+                            createdPizzasMenu.PrintMenu();
+                            string pizzaToRemove = createdPizzasMenu.GetOption();
+                            if (pizzaToRemove.Equals("Exit")) break;
+                            
+                            foreach (Pizza pizza in pizzas)
+                            {
+                                if (pizzaToRemove.Equals(pizza.ToString())) 
+                                {
+                                    pizzas.Remove(pizza).ToString();
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                
+                    case "View Order":
+                        while (true)
+                        {
+                            
+                            Menu pizzasMenu = new Menu("Your Order");
+                            pizzasMenu.ToggleLiveEditting();
+
+                            Dictionary<string, double> pizzaCosts = new Dictionary<string, double>();
+                            double totalCost = 0;
+
+                            foreach (Pizza pizza in pizzas)
+                            {
+                                double pizzaCost = Pizza.GetCost(pizza, pizzaSizesPricing, toppingsPricing);
+                                pizzaCosts.Add(pizza.ToString(), pizzaCost);
+                                totalCost += pizzaCost;
+                            }
+
+                            pizzasMenu.AddItems(pizzaCosts);
+                            pizzasMenu.PrintMenu();
+
+                            Console.WriteLine($"\nTotal Cost: {totalCost.ToString("C", System.Globalization.CultureInfo.CurrentCulture)}\n");
+                            Console.Write(">> ");
+                            string? userSelection = Console.ReadLine();
+
+                            if (string.IsNullOrEmpty(userSelection)) continue;
+                            else if (userSelection.Equals("x")) break;
+                            else if (userSelection.Equals("c"))
+                            {
+                                Menu.PromptUser("Your pizza will be delivered shortly!");
+                                pizzas.Clear();
+                                break;
+                            };                            
+                        }
+                        break;
                 }
+                
             }
         }
     }
